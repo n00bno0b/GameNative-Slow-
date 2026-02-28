@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "gamenative"
 include(":app")
 include(":ubuntufs")
+include(":lemuroid")

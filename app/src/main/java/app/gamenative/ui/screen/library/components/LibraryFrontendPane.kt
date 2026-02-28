@@ -107,6 +107,7 @@ private enum class FrontendTab(val label: String) {
     EPIC("Epic"),
     GOG("GOG"),
     AMAZON("Amazon"),
+    RETRO("Retro"),
 }
 
 private enum class ControllerType {
@@ -770,6 +771,7 @@ internal fun LibraryFrontendPane(
                 FrontendTab.GOG -> state.gogItems.filter { currentFilter.contains(AppType.game) }
                 FrontendTab.AMAZON -> state.amazonItems.filter { currentFilter.contains(AppType.game) }
                 FrontendTab.DOWNLOADS -> emptyList() // Downloads tab handles its own list
+                FrontendTab.RETRO -> emptyList() // Placeholder for Lemuroid integration
             }
         }
     }
@@ -949,6 +951,7 @@ internal fun LibraryFrontendPane(
                                         gridState.animateScrollToItem(newIdx)
                                     }
                                 }
+                            }
                             }
                         }
                     }
@@ -1646,6 +1649,25 @@ internal fun LibraryFrontendPane(
                             state = pullToRefreshState,
                             modifier = Modifier.fillMaxSize()
                         ) {
+                            if (tabs[selectedTabIdx] == FrontendTab.RETRO) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize().padding(top = 100.dp),
+                                    contentAlignment = Alignment.TopCenter
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "Retro Games (Lemuroid)",
+                                            style = MaterialTheme.typography.headlineMedium,
+                                            color = Color.White
+                                        )
+                                        Spacer(Modifier.height(16.dp))
+                                        Text(
+                                            text = "Lemuroid integration proof of concept.",
+                                            color = Color.White.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
+                            } else {
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(4),
                                 state = gridState,
