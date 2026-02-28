@@ -205,6 +205,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":lemuroid"))
     implementation(libs.material)
 
     // Chrome Custom Tabs for GOG OAuth
