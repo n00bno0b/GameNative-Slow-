@@ -83,6 +83,16 @@ public class PerformanceTuner {
         }
     }
 
+    /**
+     * Starts a root-backed performance tuning loop that maintains elevated GPU/CPU settings.
+     *
+     * If root access is not granted or root tuning is already active, the method returns immediately.
+     * Otherwise it marks root tuning active, launches (or reuses) a persistent `su` process, detects the GPU
+     * maximum frequency, and schedules a recurring task that re-applies root performance settings every 1000 ms
+     * when necessary.
+     *
+     * The method clears the active flag and aborts setup if starting the persistent `su` process fails.
+     */
     public static void startRootPerformanceMode() {
         if (isRootPerfRunning || !isRootAccessGranted) return;
         isRootPerfRunning = true;
@@ -99,6 +109,7 @@ public class PerformanceTuner {
                 return;
             }
 
+            // In Context-less environment, we'll try to detect generic values
             detectMaxFrequency();
             
             rootPerfRunnable = new Runnable() {
@@ -180,6 +191,16 @@ public class PerformanceTuner {
         }
     }
 
+    /**
+     * Detects and caches the GPU's maximum frequency by reading known sysfs nodes.
+     *
+     * Attempts to read max frequency values from common sysfs paths and stores the
+     * first non-empty value in {@code cachedMaxFreq}. If those nodes are absent or
+     * empty, it reads the available frequencies list and selects a preferred value:
+     * it chooses "1200000000" or "1100000000" if present (to better support Adreno
+     * 830/840), otherwise it uses the last frequency in the list. If no valid
+     * value is found, {@code cachedMaxFreq} is left unchanged.
+     */
     private static void detectMaxFrequency() {
         String[] nodes = {
             "/sys/class/kgsl/kgsl-3d0/devfreq/max_freq",
@@ -198,6 +219,16 @@ public class PerformanceTuner {
         String avail = readNode("/sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies");
         if (avail != null && !avail.isEmpty()) {
             String[] freqs = avail.trim().split("\\s+");
+
+            // Prefer 1200MHz/1100MHz if it is in the list of available frequencies
+            // to support Adreno 830/840 better in case it's misidentified
+            for (int i = 0; i < freqs.length; i++) {
+                if ("1200000000".equals(freqs[i]) || "1100000000".equals(freqs[i])) {
+                    cachedMaxFreq = freqs[i];
+                    return;
+                }
+            }
+
             cachedMaxFreq = freqs[freqs.length - 1];
         }
     }

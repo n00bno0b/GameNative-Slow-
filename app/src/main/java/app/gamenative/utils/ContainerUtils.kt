@@ -40,6 +40,15 @@ object ContainerUtils {
         val name: String,
     )
 
+    /**
+     * Initializes global default container configuration values based on the current device's GPU capabilities.
+     *
+     * Sets DefaultVersion fields (variant, wine version, default graphics driver, DXVK, VKD3D, wrapper,
+     * Steam type, and async cache flag) according to whether the device is Turnip-capable, an Adreno 8 Elite,
+     * or neither.
+     *
+     * @param context Android Context used to detect GPU capabilities.
+     */
     fun setContainerDefaults(context: Context) {
         // Override default driver and DXVK version based on Turnip capability
         if (GPUInformation.isTurnipCapable(context)) {
@@ -57,7 +66,7 @@ object ContainerUtils {
             DefaultVersion.DEFAULT_GRAPHICS_DRIVER = "Wrapper"
             DefaultVersion.DXVK = "2.4.1-gplasync"
             DefaultVersion.VKD3D = "2.14.1"
-            DefaultVersion.WRAPPER = "Turnip_Gen8_V23"
+            DefaultVersion.WRAPPER = "a8xx-gen8-V22"
             DefaultVersion.STEAM_TYPE = Container.STEAM_TYPE_NORMAL
             DefaultVersion.ASYNC_CACHE = "1"
         } else {
