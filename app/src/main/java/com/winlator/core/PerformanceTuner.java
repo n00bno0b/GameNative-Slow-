@@ -99,6 +99,7 @@ public class PerformanceTuner {
                 return;
             }
 
+            // In Context-less environment, we'll try to detect generic values
             detectMaxFrequency();
             
             rootPerfRunnable = new Runnable() {
@@ -198,6 +199,16 @@ public class PerformanceTuner {
         String avail = readNode("/sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies");
         if (avail != null && !avail.isEmpty()) {
             String[] freqs = avail.trim().split("\\s+");
+
+            // Prefer 1200MHz/1100MHz if it is in the list of available frequencies
+            // to support Adreno 830/840 better in case it's misidentified
+            for (int i = 0; i < freqs.length; i++) {
+                if ("1200000000".equals(freqs[i]) || "1100000000".equals(freqs[i])) {
+                    cachedMaxFreq = freqs[i];
+                    return;
+                }
+            }
+
             cachedMaxFreq = freqs[freqs.length - 1];
         }
     }
